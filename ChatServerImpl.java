@@ -17,7 +17,12 @@ public class ChatServerImpl extends UnicastRemoteObject implements ChatServer {
     public void enter(String name, Callback cb) throws RemoteException {
         for (Map.Entry<String, Callback> entry : callbackMap.entrySet()) {
             Callback callback = entry.getValue();
-            callback.show(name+" has entered the chat.\n");
+            try {
+                callback.show(name+" has entered the chat.\n");
+            } catch (RemoteException e) {
+                System.out.println("A RemoteException occurred when sending message to " + entry.getKey() + " :" + e.getMessage());
+            }
+
         }
         callbackMap.put(name, cb);
     }
@@ -26,7 +31,11 @@ public class ChatServerImpl extends UnicastRemoteObject implements ChatServer {
         callbackMap.remove(name);
         for (Map.Entry<String, Callback> entry : callbackMap.entrySet()) {
             Callback callback = entry.getValue();
-            callback.show(name+" has left the chat.\n");
+            try {
+                callback.show(name+" has left the chat.\n");
+            } catch (RemoteException e) {
+                System.out.println("A RemoteException occurred when sending message to " + entry.getKey() + " :" + e.getMessage());
+            }
         }
     }
 
@@ -47,10 +56,29 @@ public class ChatServerImpl extends UnicastRemoteObject implements ChatServer {
         for (Map.Entry<String, Callback> entry : callbackMap.entrySet()) {
             String other = entry.getKey();
             Callback callback = entry.getValue();
-            System.out.println("Received from " + name + ". Send to " + other);
-            if (other.equals(name)) {
-                callback.show(name+" says: "+text+"\n");
+
+            if (!other.equals(name)) {
+                try {
+                    callback.show(name+" says: "+text+"\n");
+                } catch (RemoteException e) {
+                    System.out.println("A RemoteException occurred when sending message to " + other + " :" + e.getMessage());
+                }
             }
+        }
+    }
+
+    public void attach() throws RemoteException {
+        for (Map.Entry<String, Callback> entry : callbackMap.entrySet()) {
+            String other = entry.getKey();
+            Callback callback = entry.getValue();
+
+            // if (!other.equals(name)) {
+            //     try {
+            //         callback.show(name+" says: "+text+"\n");
+            //     } catch (RemoteException e) {
+            //         System.out.println("A RemoteException occurred when sending message to " + other + " :" + e.getMessage());
+            //     }
+            // }
         }
     }
 

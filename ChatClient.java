@@ -7,8 +7,10 @@ import java.awt.TextArea;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.ServerSocket;
 import java.util.Vector;
 import java.rmi.Naming;
+import java.rmi.RemoteException;
 
 public class ChatClient {
 	public static TextArea		text;
@@ -54,6 +56,11 @@ public class ChatClient {
 		leave_button.addActionListener(new LeaveListener());
 		frame.add(leave_button);
 
+		Button attach_button = new Button("attach");
+		leave_button.addActionListener(new AttachListener());
+		frame.add(attach_button);
+
+
 		frame.setSize(470,300);
 		text.setBackground(Color.black); 
 		frame.setVisible(true);
@@ -63,10 +70,14 @@ public class ChatClient {
 	public static void enter(String username) {
 		// here you should invoke the RMI server
 		try {
+			ChatClient.text.append("You enter the room");
 			ChatServer chatserver = (ChatServer) Naming.lookup("//localhost/chatserver");
 			Callback callback = new CallbackImpl(ChatClient.text);
-		
-			chatserver.enter(username, callback);
+			try {
+				chatserver.enter(username, callback);
+            } catch (RemoteException e) {
+				System.out.println("A RemoteException occurred when connecting to ChatServer: " + e.getMessage());
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -75,9 +86,13 @@ public class ChatClient {
 	public static void leave(String username) {
 		// here you should invoke the RMI server
 		try {
+			ChatClient.text.append("You have left the room");
 			ChatServer chatserver = (ChatServer) Naming.lookup("//localhost/chatserver");
-
-			chatserver.leave(username);
+			try {
+				chatserver.leave(username);
+            } catch (RemoteException e) {
+				System.out.println("A RemoteException occurred when leaving to ChatServer: " + e.getMessage());
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -90,11 +105,15 @@ public class ChatClient {
 		try {
 			ChatServer chatserver = (ChatServer) Naming.lookup("//localhost/chatserver");
 
-			people = chatserver.who();
-			if (people.length == 1) ChatClient.text.append("You are alone.\n");
-			else ChatClient.text.append(people.length+" people in this chat:\n");
-			for (String p : people) {
-				ChatClient.text.append(p+"\n");
+			try {
+				people = chatserver.who();
+				if (people.length == 1) ChatClient.text.append("You are alone.\n");
+				else ChatClient.text.append(people.length+" people in this chat:\n");
+				for (String p : people) {
+					ChatClient.text.append(p+"\n");
+				}
+				} catch (RemoteException e) {
+				System.out.println("A RemoteException occurred when getting list of people from ChatServer: " + e.getMessage());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -107,7 +126,27 @@ public class ChatClient {
 		try {
 			ChatServer chatserver = (ChatServer) Naming.lookup("//localhost/chatserver");
 
-			chatserver.write(username, text);
+			try {
+				chatserver.write(username, text);
+            } catch (RemoteException e) {
+				System.out.println("A RemoteException occurred when writing to ChatServer: " + e.getMessage());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void attach() {
+		// here you should invoke the RMI server
+		ChatClient.text.append("You say: "+text+"\n");
+		try {
+			ChatServer chatserver = (ChatServer) Naming.lookup("//localhost/chatserver");
+
+			try {
+				chatserver.attach();
+            } catch (RemoteException e) {
+				System.out.println("A RemoteException occurred when attaching file to ChatServer: " + e.getMessage());
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -166,4 +205,15 @@ public class ChatClient {
 		}
 	}
 
+		// action invoked when the "attach" button is clicked
+		class AttachListener implements ActionListener {
+			public void actionPerformed (ActionEvent ae) {
+				try {
+					ChatClient.attach();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
+	
 
