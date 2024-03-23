@@ -7,6 +7,9 @@ import java.awt.TextArea;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.Vector;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
@@ -57,7 +60,7 @@ public class ChatClient {
 		frame.add(leave_button);
 
 		Button attach_button = new Button("attach");
-		leave_button.addActionListener(new AttachListener());
+		attach_button.addActionListener(new AttachListener());
 		frame.add(attach_button);
 
 		frame.setSize(470, 300);
@@ -68,7 +71,7 @@ public class ChatClient {
 	public static void enter(String username) {
 		// here you should invoke the RMI server
 		try {
-			ChatClient.text.append("You enter the room");
+			ChatClient.text.append("You enter the room\n");
 			ChatServer chatserver = (ChatServer) Naming.lookup("//localhost/chatserver");
 			Callback callback = new CallbackImpl(ChatClient.text);
 			try {
@@ -84,7 +87,7 @@ public class ChatClient {
 	public static void leave(String username) {
 		// here you should invoke the RMI server
 		try {
-			ChatClient.text.append("You have left the room");
+			ChatClient.text.append("You have left the room\n");
 			ChatServer chatserver = (ChatServer) Naming.lookup("//localhost/chatserver");
 			try {
 				chatserver.leave(username);
@@ -137,25 +140,35 @@ public class ChatClient {
 		}
 	}
 
-	public static void attach() {
+	public static void attach(String username) {
 		// here you should invoke the RMI server
 		ChatClient.text.append("You say: " + text + "\n");
 		try {
 			ServerSocket ss;
+			String ip = "localhost";
 			int port = 10001;
 			ss = new ServerSocket(port);
 
 			ChatServer chatserver = (ChatServer) Naming.lookup("//localhost/chatserver");
 
-			while (true) {
-				Slave sl = new Slave(ss.accept());
-				sl.start();
-				}
 			try {
-				chatserver.attach();
+				chatserver.attach(username, ip, port);
 			} catch (RemoteException e) {
 				System.out.println("A RemoteException occurred when attaching file to ChatServer: " + e.getMessage());
 			}
+			
+			try {
+				// boolean done = false;
+				// while (!done) {
+				System.out.println("Slave start running");
+				Slave sl = new Slave(ss.accept());
+				sl.run();
+				// }
+
+			} catch (Exception e) {
+				System.out.println(e);
+			}
+			ss.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -218,7 +231,7 @@ class LeaveListener implements ActionListener {
 class AttachListener implements ActionListener {
 	public void actionPerformed(ActionEvent ae) {
 		try {
-			ChatClient.attach();
+			ChatClient.attach(ChatClient.myName);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

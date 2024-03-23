@@ -6,5 +6,5 @@ public interface ChatServer extends Remote {
     public void leave(String name) throws RemoteException;
     public String[] who() throws RemoteException;
     public void write(String name, String text) throws RemoteException;
-    public void attach() throws RemoteException;
+    public void attach(String name, String ip, int port) throws RemoteException;
 }
