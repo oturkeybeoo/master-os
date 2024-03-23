@@ -11,6 +11,6 @@ public class CallbackImpl extends UnicastRemoteObject implements Callback {
     }
 
     public void show(String text) throws RemoteException {
-        System.out.println(text);
+        this.text.append(text);
     }
 }

@@ -1,6 +1,5 @@
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.io.Console;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 import java.util.HashMap;

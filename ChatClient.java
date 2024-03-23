@@ -91,8 +91,8 @@ public class ChatClient {
 			ChatServer chatserver = (ChatServer) Naming.lookup("//localhost/chatserver");
 
 			people = chatserver.who();
-			if (people.length == 1) System.out.println("You are alone.\n");
-			else System.out.println(people.length+" people in this chat:\n");
+			if (people.length == 1) ChatClient.text.append("You are alone.\n");
+			else ChatClient.text.append(people.length+" people in this chat:\n");
 			for (String p : people) {
 				ChatClient.text.append(p+"\n");
 			}
