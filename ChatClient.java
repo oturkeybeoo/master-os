@@ -103,7 +103,7 @@ public class ChatClient {
 	
 	public static void write(String username, String text) {
 		// here you should invoke the RMI server
-		System.out.println("You say: "+text+"\n");
+		ChatClient.text.append("You say: "+text+"\n");
 		try {
 			ChatServer chatserver = (ChatServer) Naming.lookup("//localhost/chatserver");
 
