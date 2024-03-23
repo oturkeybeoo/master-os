@@ -64,7 +64,7 @@ public class ChatClient {
 		// here you should invoke the RMI server
 		try {
 			ChatServer chatserver = (ChatServer) Naming.lookup("//localhost/chatserver");
-			Callback callback = new CallbackImpl();
+			Callback callback = new CallbackImpl(ChatClient.text);
 		
 			chatserver.enter(username, callback);
 		} catch (Exception e) {
