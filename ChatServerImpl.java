@@ -48,7 +48,7 @@ public class ChatServerImpl extends UnicastRemoteObject implements ChatServer {
             String other = entry.getKey();
             Callback callback = entry.getValue();
             System.out.println("Received from " + name + ". Send to " + other);
-            if (other != name) {
+            if (other.equals(name)) {
                 callback.show(name+" says: "+text+"\n");
             }
         }
